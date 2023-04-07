@@ -17,7 +17,6 @@ interface ISceneSession extends Scenes.SceneSession<ISceneSession> {
   room: Chat | null;
   search_by: SearchBy;
   searchIsOn: true | false;
-  // job?: schedule.Job;
 }
 
 export interface IBotSceneContext extends Context {

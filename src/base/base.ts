@@ -23,10 +23,7 @@ export async function getUser(chat_id: string): Promise<User | null> {
   return user ? user : null;
 }
 
-export async function createUser(
-  chat_id: string,
-  sex: string
-): Promise<User | null> {
+export async function createUser(chat_id: string): Promise<User | null> {
   const user = new User();
 
   const isUserExsists = await db.manager.findOne(User, {
@@ -38,41 +35,20 @@ export async function createUser(
   }
 
   user.chat_id = chat_id;
-  user.sex = sex;
 
   return await db.manager.save(user);
 }
 
-export async function updateUser(
-  chat_id: string,
-  sex: string
-): Promise<boolean> {
-  const user = await db.manager.update(User, { chat_id }, { sex });
-
-  return user ? true : false;
-}
 ////
-export async function searchInQueue(
-  search_by: string,
-  sex?: string
-): Promise<Queue | null> {
-  if (sex) {
-    return await db.manager.findOne(Queue, { where: { search_by, sex } });
-  } else {
-    return await db.manager.findOne(Queue, { where: { search_by } });
-  }
+export async function searchInQueue(): Promise<Queue | null> {
+  const users = await db.manager.find(Queue);
+  return users ? users[0] : users;
 }
 
-export async function enterQueue(
-  chat_id: string,
-  sex: string,
-  search_by: string
-): Promise<Queue> {
+export async function enterQueue(chat_id: string): Promise<Queue> {
   const userQueue = new Queue();
 
   userQueue.chat_id = chat_id;
-  userQueue.sex = sex;
-  userQueue.search_by = search_by;
 
   return await db.manager.save(userQueue);
 }

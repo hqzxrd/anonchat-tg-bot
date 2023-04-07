@@ -1,5 +1,7 @@
 import { Markup } from "telegraf";
 
-export const chatMenu = Markup.keyboard([`Отключить собеседника`])
+import { button } from "../../../context/enum";
+
+export const chatMenu = Markup.keyboard([button.CANCEL_CHAT])
   .oneTime()
   .resize();

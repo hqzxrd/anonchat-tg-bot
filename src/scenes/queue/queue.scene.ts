@@ -3,29 +3,20 @@ import { Scenes } from "telegraf";
 
 import { checkActiveChat2, leaveQueue } from "../../base/base";
 import { IBotSceneContext } from "../../context/context.interface";
+import { button, warning } from "../../context/enum";
 
 import { queueMenu } from "./menu/queue.menu";
 
 const queueScene = new Scenes.BaseScene<IBotSceneContext>(`queue`);
 
 queueScene.enter(async (ctx) => {
-  const sex = ctx.session.search_by;
-  ctx.reply(
-    `Ищем ${
-      sex === `Любой`
-        ? `случайного собеседника`
-        : sex === `Мужской`
-        ? `парня`
-        : `девушку`
-    }..`,
-    queueMenu
-  );
+  await ctx.reply(warning.QUEUE, queueMenu);
 
   ctx.session.searchIsOn = true;
   while (!ctx.session.room && ctx.session.searchIsOn) {
-    console.log(`Query ${sex} for ${ctx.from?.first_name}`);
+    console.log(`Query for ${ctx.from?.first_name}`);
     ctx.session.room = await checkActiveChat2(String(ctx.chat?.id));
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 
   if (ctx.session.room) {
@@ -35,15 +26,15 @@ queueScene.enter(async (ctx) => {
     ctx.session.chat_id2 = chat_id2;
     ctx.session.searchIsOn = false;
 
-    ctx.scene.enter(`chat`);
+    await ctx.scene.enter(`chat`);
   }
 });
 
-queueScene.hears(`Отменить поиск`, async (ctx) => {
+queueScene.hears(button.CANCEL_SEARCH, async (ctx) => {
   await leaveQueue(String(ctx.chat.id));
 
   ctx.session.searchIsOn = false;
-  ctx.reply(`Поиск отменён`);
+  await ctx.reply(warning.CANCELED);
   ctx.scene.enter(`main`);
 });
 

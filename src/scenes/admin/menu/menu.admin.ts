@@ -1,5 +1,11 @@
 import { Markup } from "telegraf";
 
-export const adminMenu = Markup.keyboard([[`Посмотреть каналы`], [], [`Назад`]])
+import { button } from "../../../context/enum";
+
+export const adminMenu = Markup.keyboard([
+  [button.ADMIN_ALL_CHANNELS],
+  [],
+  [button.BACK],
+])
   .oneTime()
   .resize();

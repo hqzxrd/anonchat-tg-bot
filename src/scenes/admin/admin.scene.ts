@@ -3,20 +3,21 @@ import { message } from "telegraf/filters";
 
 import { deleteChannel, getChannels, saveChannel } from "../../base/base";
 import { IBotSceneContext } from "../../context/context.interface";
+import { button, warning } from "../../context/enum";
 import Channel from "../../models/channel.model";
 
 import { adminMenu } from "./menu/menu.admin";
 
 const isValidId = (id: string) => /^(-)?\d{5,32}$/.test(id);
 const isValidLink = (link: string) => /^https?:\/\//.test(link);
+const succesAddChannel = (name: string, id: string, link: string): string => {
+  return `<b>Канал добавлен:\nНазвание: ${name}\nID: ${id}\nCсылка: ${link}</b>`;
+};
 
 const adminScene = new Scenes.BaseScene<IBotSceneContext>(`admin`);
 
 adminScene.enter(async (ctx) => {
-  ctx.replyWithHTML(
-    `<b>ADMIN</b>\nДобавить канал:\n<code>/add NAME::ID::LINK</code>\n<b>ИЛИ</b>\nПереслать сюда пост канала`,
-    adminMenu
-  );
+  ctx.replyWithHTML(warning.ADMIN_SCENE_INFO, adminMenu);
 });
 
 adminScene.command(`add`, async (ctx) => {
@@ -26,38 +27,36 @@ adminScene.command(`add`, async (ctx) => {
   const link = args[2];
 
   if (!isValidId(id)) {
-    ctx.reply("Неверный ID");
+    ctx.reply(warning.ADMIN_INVALID_ID);
     return;
   }
 
   if (!isValidLink(link)) {
-    ctx.reply("Неверная ссылка");
+    ctx.reply(warning.ADMIN_INVALID_LINK);
     return;
   }
 
   await saveChannel(name, id, link);
 
-  ctx.replyWithHTML(
-    `<b>Канал добавлен:\nНазвание: ${name}\nID: ${id}\nCсылка: ${link}</b>`
-  );
+  ctx.replyWithHTML(succesAddChannel(name, id, link));
 });
 
-adminScene.hears(`Посмотреть каналы`, async (ctx) => {
+adminScene.hears(button.ADMIN_ALL_CHANNELS, async (ctx) => {
   const channels = await getChannels();
 
   if (!channels[0]) {
-    return ctx.reply(`Нет каналов`);
+    return ctx.reply(warning.ADMIN_NO_CHANNELS);
   }
 
   channels.forEach((ch: Channel) => {
     ctx.reply(
-      `Название: ${ch.name}\nid: ${ch.channel_id}\nСсылка: ${ch.link}`,
+      succesAddChannel(ch.name, ch.channel_id, ch.link),
       Markup.inlineKeyboard([Markup.button.callback("Удалить", ch.channel_id)])
     );
   });
 });
 
-adminScene.hears(`Назад`, (ctx) => {
+adminScene.hears(button.BACK, (ctx) => {
   ctx.scene.enter(`main`);
 });
 
@@ -69,9 +68,7 @@ adminScene.on(message("forward_from_chat"), async (ctx) => {
   }
 
   if (!channel.username) {
-    ctx.replyWithHTML(
-      `<b>Закрытый канал! Сгенерировать ссылку невозможно</b>\nКанал можно добавить через <code>/add NAME::ID::LINK</code>`
-    );
+    ctx.replyWithHTML(warning.ADMIN_ADD_ERROR);
     return;
   }
 
@@ -82,17 +79,16 @@ adminScene.on(message("forward_from_chat"), async (ctx) => {
   await saveChannel(name, id, link);
 
   ctx.replyWithHTML(
-    `<b>Канал добавлен:\nНазвание: ${name}\nID: ${id}\nCсылка: ${link}</b>`,
+    succesAddChannel(name, id, link),
     Markup.inlineKeyboard([Markup.button.callback("Удалить", id)])
   );
 });
 
-//action for delete-callback channel
 adminScene.action(/^[-]?\d+$/, async (ctx) => {
   const id = ctx.match[0];
 
   await deleteChannel(id);
-  ctx.editMessageText(`Канал удалён`);
+  ctx.editMessageText(warning.ADMIN_DELETE_SUCCES);
 });
 
 export default adminScene;

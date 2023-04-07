@@ -2,13 +2,14 @@ import { Scenes } from "telegraf";
 
 import { checkActiveChat1, leaveChat, leaveQueue } from "../../base/base";
 import { IBotSceneContext } from "../../context/context.interface";
+import { button, warning } from "../../context/enum";
 
 import { chatMenu } from "./menu/chat.menu";
 
 const chatScene = new Scenes.BaseScene<IBotSceneContext>(`chat`);
 
 chatScene.enter(async (ctx) => {
-  ctx.reply(`Нашёл кое-кого для тебя!💕💞`, chatMenu);
+  ctx.reply(warning.FOUND, chatMenu);
   const id1 = ctx.session.chat_id1;
   const id2 = ctx.session.chat_id2;
 
@@ -25,15 +26,14 @@ chatScene.enter(async (ctx) => {
 
     if (check === null) {
       isOn = false;
-      ctx.scene.enter(`main`);
+
+      await ctx.scene.enter(`main`);
     }
     await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 });
 
-chatScene.hears(`Отключить собеседника`, async (ctx) => {
-  console.log(`ABUBA`);
-
+chatScene.hears(button.CANCEL_CHAT, async (ctx) => {
   const id1 = ctx.session.chat_id1;
   const id2 = ctx.session.chat_id2;
   const room_id = ctx.session.room_id;
@@ -41,16 +41,25 @@ chatScene.hears(`Отключить собеседника`, async (ctx) => {
     return;
   }
 
-  ctx.telegram.sendMessage(id1, `Cобеседник отключился`);
-  ctx.telegram.sendMessage(id2, `Cобеседник отключился`);
+  ctx.telegram.sendMessage(id1, warning.DISCONNECT);
+  ctx.telegram.sendMessage(id2, warning.DISCONNECT);
 
   await leaveChat(room_id);
-  ctx.scene.enter(`main`);
 });
 
 chatScene.on(`text`, async (ctx) => {
-  if (!ctx.chat.id || !ctx.session.chat_id1 || !ctx.session.chat_id2) {
-    return;
+  const activeChat = await checkActiveChat1(
+    ctx.session.chat_id1,
+    ctx.session.chat_id2
+  );
+  if (
+    !activeChat ||
+    !ctx.chat.id ||
+    !ctx.session.chat_id1 ||
+    !ctx.session.chat_id2
+  ) {
+    ctx.reply(warning.REBOOT);
+    return ctx.scene.enter(`main`);
   }
 
   if (String(ctx.session.chat_id1) === String(ctx.chat.id)) {
