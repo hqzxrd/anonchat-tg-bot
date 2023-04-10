@@ -144,9 +144,8 @@ export async function deleteChannel(channel_id: string): Promise<DeleteResult> {
   return await db.manager.delete(Channel, { channel_id });
 }
 ////
-export async function clearAll(): Promise<void> {
+export async function clearChats(): Promise<void> {
   await db.manager.clear(Chat);
-  await db.manager.clear(Queue);
 }
 
 init();

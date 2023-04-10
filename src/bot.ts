@@ -1,7 +1,7 @@
 import { Scenes, Telegraf } from "telegraf";
 import LocalSession from "telegraf-session-local";
 
-import { clearAll, getUser } from "./base/base";
+import { clearChats } from "./base/base";
 import { configService } from "./config/config.service";
 import { IBotSceneContext } from "./context/context.interface";
 import adminScene from "./scenes/admin/admin.scene";
@@ -32,12 +32,12 @@ bot.command(`adm`, (ctx) => {
   ctx.scene.enter(`admin`);
 });
 
-bot.command(`cl`, async (ctx) => {
-  await clearAll();
+bot.command(`cl`, async () => {
+  await clearChats();
 });
 
-// bot.catch(async (err) => {
-//   console.log(`ОШИБКА!!!!!!!!!!!!!!!!! ` + err);
-// });
+bot.catch(async (err) => {
+  console.log(err);
+});
 
 bot.launch();
