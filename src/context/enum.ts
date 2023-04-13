@@ -18,7 +18,7 @@ export enum warning {
   REBOOT = `Бот был перезагружен`,
   QUEUE = `Ищем собеседника..`,
   CANCELED = `Поиск отменён`,
-  USER_NOT_FOUND = `Пользователь не существует или забанен.`,
+  USER_NOT_FOUND = `Пользователь не существует или забанен.\n/start`,
 
   ADMIN_SCENE_INFO = `<b>ADMIN</b>\nДобавить канал:\n<code>/add NAME::ID::LINK</code>\n<b>ИЛИ</b>\nПереслать сюда пост канала`,
   ADMIN_INVALID_ID = `Неверный ID`,

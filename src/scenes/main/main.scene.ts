@@ -52,7 +52,7 @@ mainScene.hears([button.SEARCH], async (ctx) => {
 
     let str = `Привет! Чат бесплатный, но нужно подписаться на несколько каналов:\n`;
 
-    channels.forEach((ch) => {
+    channels.map((ch) => {
       str += `<a href="${ch.link}">${ch.name}</a> \n`;
     });
 
@@ -60,9 +60,7 @@ mainScene.hears([button.SEARCH], async (ctx) => {
       await ctx.replyWithHTML(str);
       return;
     }
-  } catch (err) {
-    console.log(err);
-  } finally {
+
     const roommate = await searchInQueue();
 
     if (roommate) {
@@ -79,6 +77,8 @@ mainScene.hears([button.SEARCH], async (ctx) => {
 
       ctx.scene.enter(`queue`);
     }
+  } catch (err) {
+    console.log(err);
   }
 });
 

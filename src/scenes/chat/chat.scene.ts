@@ -48,8 +48,8 @@ chatScene.hears(button.CANCEL_CHAT, async (ctx) => {
       return ctx.scene.enter(`main`);
     }
 
-    ctx.telegram.sendMessage(id1, warning.DISCONNECT);
-    ctx.telegram.sendMessage(id2, warning.DISCONNECT);
+    await ctx.telegram.sendMessage(id1, warning.DISCONNECT);
+    await ctx.telegram.sendMessage(id2, warning.DISCONNECT);
 
     await leaveChat(room_id);
   } catch (err) {
@@ -111,21 +111,22 @@ async function sendMessage(type: string, ctx: any) {
     switch (type) {
       case `text`:
         if (String(ctx.session.chat_id1) === String(ctx.chat.id)) {
-          ctx.telegram.sendMessage(ctx.session.chat_id2, message);
+          await ctx.telegram.sendMessage(ctx.session.chat_id2, message);
         } else {
-          ctx.telegram.sendMessage(ctx.session.chat_id1, message);
+          await ctx.telegram.sendMessage(ctx.session.chat_id1, message);
         }
+
         break;
       case `sticker`:
         if (String(ctx.session.chat_id1) === String(ctx.chat.id)) {
-          ctx.telegram.sendSticker(ctx.session.chat_id2, message.file_id);
+          await ctx.telegram.sendSticker(ctx.session.chat_id2, message.file_id);
         } else {
-          ctx.telegram.sendSticker(ctx.session.chat_id1, message.file_id);
+          await ctx.telegram.sendSticker(ctx.session.chat_id1, message.file_id);
         }
         break;
       case `photo`:
         if (String(ctx.session.chat_id1) === String(ctx.chat.id)) {
-          ctx.telegram.sendPhoto(
+          await ctx.telegram.sendPhoto(
             ctx.session.chat_id2,
             message[ctx.message.photo.length - 1].file_id,
             {
@@ -133,7 +134,7 @@ async function sendMessage(type: string, ctx: any) {
             }
           );
         } else {
-          ctx.telegram.sendPhoto(
+          await ctx.telegram.sendPhoto(
             ctx.session.chat_id1,
             message[ctx.message.photo.length - 1].file_id,
             {
@@ -144,47 +145,61 @@ async function sendMessage(type: string, ctx: any) {
         break;
       case `video`:
         if (String(ctx.session.chat_id1) === String(ctx.chat.id)) {
-          ctx.telegram.sendVideo(ctx.session.chat_id2, message.file_id, {
+          await ctx.telegram.sendVideo(ctx.session.chat_id2, message.file_id, {
             caption,
           });
         } else {
-          ctx.telegram.sendVideo(ctx.session.chat_id1, message.file_id, {
+          await ctx.telegram.sendVideo(ctx.session.chat_id1, message.file_id, {
             caption,
           });
         }
         break;
       case `video_note`:
         if (String(ctx.session.chat_id1) === String(ctx.chat.id)) {
-          ctx.telegram.sendVideoNote(ctx.session.chat_id2, message.file_id);
+          await ctx.telegram.sendVideoNote(
+            ctx.session.chat_id2,
+            message.file_id
+          );
         } else {
-          ctx.telegram.sendVideoNote(ctx.session.chat_id1, message.file_id);
+          await ctx.telegram.sendVideoNote(
+            ctx.session.chat_id1,
+            message.file_id
+          );
         }
         break;
       case `animation`:
         if (String(ctx.session.chat_id1) === String(ctx.chat.id)) {
-          ctx.telegram.sendAnimation(ctx.session.chat_id2, message.file_id, {
-            caption,
-          });
+          await ctx.telegram.sendAnimation(
+            ctx.session.chat_id2,
+            message.file_id,
+            {
+              caption,
+            }
+          );
         } else {
-          ctx.telegram.sendVideo(ctx.session.chat_id1, message.file_id, {
+          await ctx.telegram.sendVideo(ctx.session.chat_id1, message.file_id, {
             caption,
           });
         }
         break;
       case `voice`:
         if (String(ctx.session.chat_id1) === String(ctx.chat.id)) {
-          ctx.telegram.sendAudio(ctx.session.chat_id2, message.file_id, {
+          await ctx.telegram.sendAudio(ctx.session.chat_id2, message.file_id, {
             caption: caption,
           });
         } else {
-          ctx.telegram.sendAudio(ctx.session.chat_id1, message.file_id, {
+          await ctx.telegram.sendAudio(ctx.session.chat_id1, message.file_id, {
             caption: caption,
           });
         }
         break;
     }
   } catch (err) {
-    console.log(err);
+    if (err.response.description === `Forbidden: bot was blocked by the user`) {
+      await ctx.reply(`Собеседник заблокировал бота..`);
+      await ctx.scene.enter(`main`);
+      console.log(err);
+    }
   }
 }
 

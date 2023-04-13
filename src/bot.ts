@@ -1,7 +1,7 @@
 import { Scenes, Telegraf } from "telegraf";
 import LocalSession from "telegraf-session-local";
 
-import { clearChats } from "./base/base";
+import { clearChats, getUser } from "./base/base";
 import { configService } from "./config/config.service";
 import { IBotSceneContext } from "./context/context.interface";
 import adminScene from "./scenes/admin/admin.scene";
@@ -28,15 +28,21 @@ bot.command(`start`, async (ctx) => {
   ctx.scene.enter(`main`);
 });
 
-bot.command(`adm`, (ctx) => {
-  ctx.scene.enter(`admin`);
+bot.command(`adm`, async (ctx) => {
+  const adminId = configService(`ADMIN`);
+  if (String(ctx.chat.id) === adminId) {
+    await ctx.scene.enter(`admin`);
+  }
 });
 
-bot.command(`cl`, async () => {
-  await clearChats();
+bot.command(`clear`, async (ctx) => {
+  const adminId = configService(`ADMIN`);
+  if (String(ctx.chat.id) === adminId) {
+    await clearChats();
+  }
 });
 
-bot.catch(async (err) => {
+bot.catch((err) => {
   console.log(err);
 });
 

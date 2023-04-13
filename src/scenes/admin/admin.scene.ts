@@ -11,7 +11,7 @@ import { adminMenu } from "./menu/menu.admin";
 const isValidId = (id: string) => /^(-)?\d{5,32}$/.test(id);
 const isValidLink = (link: string) => /^https?:\/\//.test(link);
 const succesAddChannel = (name: string, id: string, link: string): string => {
-  return `<b>Канал добавлен:\nНазвание: ${name}\nID: ${id}\nCсылка: ${link}</b>`;
+  return `<b>Канал:\nНазвание: ${name}\nID: ${id}\nCсылка: ${link}</b>`;
 };
 
 const adminScene = new Scenes.BaseScene<IBotSceneContext>(`admin`);
@@ -36,6 +36,16 @@ adminScene.command(`add`, async (ctx) => {
       return;
     }
 
+    const isBotChatAdmin = await ctx.telegram.getChatMember(id, ctx.botInfo.id);
+    console.log(isBotChatAdmin);
+
+    if (isBotChatAdmin.status !== `administrator`) {
+      ctx.reply(
+        `Бот не является администратором канала, добавление невозможно`
+      );
+      return;
+    }
+
     if (!isValidLink(link)) {
       await ctx.reply(warning.ADMIN_INVALID_LINK);
       return;
@@ -45,6 +55,10 @@ adminScene.command(`add`, async (ctx) => {
 
     await ctx.replyWithHTML(succesAddChannel(name, id, link));
   } catch (err) {
+    if (err.response.error_code === 400) {
+      await ctx.reply(`Канала с таким ID не существует`);
+      console.log(err);
+    }
     console.log(err);
   }
 });
@@ -79,6 +93,18 @@ adminScene.on(message("forward_from_chat"), async (ctx) => {
     const channel = ctx.message.forward_from_chat;
     console.log(channel);
     if (channel.type !== `channel`) {
+      return;
+    }
+
+    const isBotChatAdmin = await ctx.telegram.getChatMember(
+      channel.id,
+      ctx.botInfo.id
+    );
+
+    if (isBotChatAdmin.status !== `administrator`) {
+      ctx.reply(
+        `Бот не является администратором канала, добавление невозможно`
+      );
       return;
     }
 
