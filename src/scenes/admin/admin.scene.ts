@@ -2,6 +2,8 @@ import { Scenes, Markup } from "telegraf";
 import { message } from "telegraf/filters";
 
 import { deleteChannel, getChannels, saveChannel } from "../../base/base";
+import { leaveQueue } from "../../base/base";
+import { leaveChat } from "../../base/base";
 import { IBotSceneContext } from "../../context/context.interface";
 import { button, warning } from "../../context/enum";
 import Channel from "../../models/channel.model";
@@ -18,6 +20,9 @@ const adminScene = new Scenes.BaseScene<IBotSceneContext>(`admin`);
 
 adminScene.enter(async (ctx) => {
   try {
+    await leaveChat(ctx.session?.room_id);
+    await leaveQueue(String(ctx.chat?.id));
+
     await ctx.replyWithHTML(warning.ADMIN_SCENE_INFO, adminMenu);
   } catch (err) {
     console.log(err);
@@ -40,9 +45,7 @@ adminScene.command(`add`, async (ctx) => {
     console.log(isBotChatAdmin);
 
     if (isBotChatAdmin.status !== `administrator`) {
-      ctx.reply(
-        `Бот не является администратором канала, добавление невозможно`
-      );
+      ctx.reply(warning.ADMIN_ADD_ERROR1);
       return;
     }
 
@@ -54,9 +57,9 @@ adminScene.command(`add`, async (ctx) => {
     await saveChannel(name, id, link);
 
     await ctx.replyWithHTML(succesAddChannel(name, id, link));
-  } catch (err) {
+  } catch (err: any) {
     if (err.response.error_code === 400) {
-      await ctx.reply(`Канала с таким ID не существует`);
+      await ctx.reply(warning.ADMIN_NOT_FOUND_ID);
       console.log(err);
     }
     console.log(err);
@@ -102,14 +105,12 @@ adminScene.on(message("forward_from_chat"), async (ctx) => {
     );
 
     if (isBotChatAdmin.status !== `administrator`) {
-      ctx.reply(
-        `Бот не является администратором канала, добавление невозможно`
-      );
+      ctx.reply(warning.ADMIN_ADD_ERROR1);
       return;
     }
 
     if (!channel.username) {
-      await ctx.replyWithHTML(warning.ADMIN_ADD_ERROR);
+      await ctx.replyWithHTML(warning.ADMIN_ADD_ERROR2);
       return;
     }
 

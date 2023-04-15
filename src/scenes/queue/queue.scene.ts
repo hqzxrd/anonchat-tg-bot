@@ -47,4 +47,8 @@ queueScene.hears(button.CANCEL_SEARCH, async (ctx) => {
   }
 });
 
+queueScene.leave(async (ctx) => {
+  ctx.session.searchIsOn = false;
+});
+
 export default queueScene;

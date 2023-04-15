@@ -194,7 +194,7 @@ async function sendMessage(type: string, ctx: any) {
         }
         break;
     }
-  } catch (err) {
+  } catch (err: any) {
     if (err.response.description === `Forbidden: bot was blocked by the user`) {
       await ctx.reply(`Собеседник заблокировал бота..`);
       await ctx.scene.enter(`main`);

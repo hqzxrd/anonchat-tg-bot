@@ -22,8 +22,10 @@ export enum warning {
 
   ADMIN_SCENE_INFO = `<b>ADMIN</b>\nДобавить канал:\n<code>/add NAME::ID::LINK</code>\n<b>ИЛИ</b>\nПереслать сюда пост канала`,
   ADMIN_INVALID_ID = `Неверный ID`,
+  ADMIN_NOT_FOUND_ID = `Канала с таким ID не существует`,
   ADMIN_INVALID_LINK = `Неверная ссылка`,
   ADMIN_NO_CHANNELS = `Нет каналов`,
-  ADMIN_ADD_ERROR = `<b>Закрытый канал! Сгенерировать ссылку невозможно</b>\nКанал можно добавить через <code>/add NAME::ID::LINK</code>`,
+  ADMIN_ADD_ERROR1 = `Бот не является администратором канала, добавление невозможно`,
+  ADMIN_ADD_ERROR2 = `<b>Закрытый канал! Сгенерировать ссылку невозможно</b>\nКанал можно добавить через <code>/add NAME::ID::LINK</code>`,
   ADMIN_DELETE_SUCCES = `Канал удалён`,
 }

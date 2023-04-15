@@ -25,19 +25,23 @@ bot.use(localSession.middleware());
 bot.use(stage.middleware());
 
 bot.command(`start`, async (ctx) => {
-  ctx.scene.enter(`main`);
+  await ctx.scene.enter(`main`);
 });
 
 bot.command(`adm`, async (ctx) => {
+  const user = await getUser(String(ctx.chat.id));
   const adminId = configService(`ADMIN`);
-  if (String(ctx.chat.id) === adminId) {
+  console.log(adminId, user);
+  if (String(ctx.chat.id) === adminId || user?.isAdmin) {
     await ctx.scene.enter(`admin`);
   }
 });
 
 bot.command(`clear`, async (ctx) => {
+  const user = await getUser(String(ctx.chat.id));
   const adminId = configService(`ADMIN`);
-  if (String(ctx.chat.id) === adminId) {
+
+  if (String(ctx.chat.id) === adminId || user?.isAdmin) {
     await clearChats();
   }
 });
